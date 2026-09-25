@@ -1,5 +1,8 @@
 ;===== machine: X1-0.4 ====================
 ;===== date: 20251031 ==================
+;===== FAST START MOD 2026-09-24 ==========
+; Changes: vibration check disabled; bed heating overlaps startup; scanner clarity disabled; startup purge reduced.
+; Keep a stock profile for maintenance/calibration and for troubleshooting first-layer issues.
 ;===== start printer sound ================
 M17
 M400 S1
@@ -45,8 +48,8 @@ M204 S10000 ; init ACC set to 10m/s^2
 
 ;===== heatbed preheat ====================
 M1002 gcode_claim_action:54
-M140 S[bed_temperature_initial_layer_single] ;set bed temp
-M190 S[bed_temperature_initial_layer_single] ;wait for bed temp
+M140 S[bed_temperature_initial_layer_single] ;set bed temp, FAST START: do not wait here
+;M190 S[bed_temperature_initial_layer_single] ;FAST START: moved to before first Z home
 
 {if scan_first_layer}
 ;=========register first layer scan=====
@@ -91,15 +94,15 @@ M412 S1 ; ===turn on filament runout detection===
 M109 S250 ;set nozzle to common flush temp
 M106 P1 S0
 G92 E0
-G1 E50 F200
+G1 E25 F300 ;FAST START: reduced initial purge from 50mm
 M400
 M104 S[nozzle_temperature_initial_layer]
 G92 E0
-G1 E50 F200
+G1 E20 F300 ;FAST START: reduced second purge from 50mm
 M400
 M106 P1 S255
 G92 E0
-G1 E5 F300
+G1 E4 F300 ;FAST START: reduced final purge from 5mm
 M109 S{nozzle_temperature_initial_layer[initial_no_support_extruder]-20} ; drop nozzle temp, make filament shink a bit
 G92 E0
 G1 E-0.5 F300
@@ -128,6 +131,7 @@ M109 S{nozzle_temperature_initial_layer[initial_no_support_extruder]-20}
 G1 X100 F18000 ; first wipe mouth
 
 G0 X135 Y253 F20000  ; move to exposed steel surface edge
+M190 S[bed_temperature_initial_layer_single] ;FAST START: wait for bed only when Z homing actually needs it
 G28 Z P0 T300; home z with low precision,permit 300deg temperature
 G29.2 S0 ; turn off ABL
 G0 Z5 F20000
@@ -207,11 +211,11 @@ G29.2 S1 ; turn on ABL
 M106 S0 ; turn off fan , too noisy
 ;===== wipe nozzle end ================================
 
-;===== check scanner clarity ===========================
-G1 X128 Y128 F24000
-G28 Z P0
-M972 S5 P0
-G1 X230 Y15 F24000
+;===== check scanner clarity DISABLED - FAST START =====
+;G1 X128 Y128 F24000
+;G28 Z P0
+;M972 S5 P0
+;G1 X230 Y15 F24000
 ;===== check scanner clarity end =======================
 
 ;===== bed leveling ==================================
@@ -250,20 +254,20 @@ M106 P2 S100 ; turn on big fan ,to cool down toolhead
 M104 S{nozzle_temperature_initial_layer[initial_no_support_extruder]} ; set extrude temp earlier, to reduce wait time
 
 ;===== mech mode fast check============================
-G1 X128 Y128 Z10 F20000
-M400 P200
-M970.3 Q1 A7 B30 C80  H15 K0
-M974 Q1 S2 P0
+;G1 X128 Y128 Z10 F20000
+;M400 P200
+;M970.3 Q1 A7 B30 C80  H15 K0
+;M974 Q1 S2 P0
 
-G1 X128 Y128 Z10 F20000
-M400 P200
-M970.3 Q0 A7 B30 C90 Q0 H15 K0
-M974 Q0 S2 P0
+;G1 X128 Y128 Z10 F20000
+;M400 P200
+;M970.3 Q0 A7 B30 C90 Q0 H15 K0
+;M974 Q0 S2 P0
 
 M975 S1
-G1 F30000
-G1 X230 Y15
-G28 X ; re-home XY
+;G1 F30000
+;G1 X230 Y15
+;G28 X ; re-home XY
 ;===== mech mode fast check============================
 
 {if scan_first_layer}
