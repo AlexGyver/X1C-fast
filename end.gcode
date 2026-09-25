@@ -1,4 +1,6 @@
 ;===== date: 20240528 =====================
+;===== FAST END MOD 2026-09-24 ==========
+;disabled wipe
 M400 ; wait for buffer to clear
 G92 E0 ; zero the extruder
 G1 E-0.8 F1800 ; retract
@@ -14,15 +16,17 @@ M106 P2 S0 ; turn off remote part cooling fan
 M106 P3 S0 ; turn off chamber cooling fan
 
 G1 X100 F12000 ; wipe
-; pull back filament to AMS
-M620 S255
-G1 X20 Y50 F12000
-G1 Y-3
-T255
-G1 X65 F12000
-G1 Y265
-G1 X100 F12000 ; wipe
-M621 S255
+
+; FAST END: keep current AMS filament loaded
+;M620 S255
+;G1 X20 Y50 F12000
+;G1 Y-3
+;T255
+;G1 X65 F12000
+;G1 Y265
+;G1 X100 F12000 ; wipe
+;M621 S255
+
 M104 S0 ; turn off hotend
 
 M622.1 S1 ; for prev firware, default turned on
